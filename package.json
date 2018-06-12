@@ -1,0 +1,26 @@
+{
+  "name": "com.chinamobile.gdwy.camera",
+  "version": "2.6.1",
+  "description": "this is a plugin about camera.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "liangzhongtai",
+  "license": "ISC",
+  "cordova": {
+    "id": "com.chinamobile.gdwy.camera",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liangzhongtai/Camera.git"
+  },
+  "keywords": [
+    "cordova",
+    "camera"
+  ]
+}
