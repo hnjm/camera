@@ -1,5 +1,5 @@
 ##Camera插件使用说明
-* 版本:2.6.1
+* 版本:2.8.0
 
 ##环境配置
 * npm 4.4.1 +
@@ -10,7 +10,7 @@
 ####注意:
 ######ios平台,Mac系统下如果以下的控制台命令遇到权限问题，可以在命令前加sudo
 
-######ios 平台构建，需要在项目的info.list添加以下权限:
+######ios平台构建，需要在项目的info.list添加以下权限:
 ######Privacy-Camera Usage Description String "请同意，使用相机"
 ######Privacy-Photo Library Addtions Usage Description String "请同意，保存图片到相册"
 ######Privacy-Photo Library Usage Description String "请同意，使用相册"
@@ -18,7 +18,7 @@
 ######Privacy-Location Always and When in Use Usage Description String "请同意,开启定位服务"
 ######Privacy-Location When In Use Usage Description String "请同意，开启定位服务"
 
-######安卓平台需要添加支持包：com.android.support:support-v4:27.1.0及以下版本
+######安卓平台需要添加support支持包：com.android.support:support-v4:27.1.0及以下版本
 
 ######1.进入项目的根目录，添加相机插件::com.chinamobile.gdwy.camera
 * 为项目添加Camera插件，执行:`cordova plugin add com.chinamobile.gdwy.camera`

@@ -1,6 +1,6 @@
 {
   "name": "com.chinamobile.gdwy.camera",
-  "version": "2.6.1",
+  "version": "2.8.0",
   "description": "this is a plugin about camera.",
   "main": "index.js",
   "scripts": {
