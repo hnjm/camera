@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="com.chinamobile.gdwy.camera" version="2.8.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="com.chinamobile.gdwy.camera" version="2.9.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>camera</name>
     <js-module name="CameraMy" src="www/camera.js">
         <clobbers target="cordova.plugins.camera" />
@@ -69,6 +69,8 @@
         <source-file src="src/ios/NSCameraUtil.m" />
         <header-file src="src/ios/MoLocationManager.h" />
         <source-file src="src/ios/MoLocationManager.m" />
+        <header-file src="src/ios/CameraWindow.h" />
+        <source-file src="src/ios/CameraWindow.m" />
         
     </platform>
 </plugin>
