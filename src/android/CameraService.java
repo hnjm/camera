@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Gravity;
@@ -42,6 +43,56 @@ public class CameraService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        initWindow();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if(windowManager == null){
+            initWindow();
+        }
+        try {
+            if(!viewAdded){
+                viewAdded = true;
+                windowManager.addView(floatingLL,wmParams);
+            }
+            SensorUtil.listener = (x, y, z) -> {
+                if(!viewAdded)return;
+                String[] texts = new String[]{"x: "+(int)x+" °","y: "+(int)y+"°","z: "+(int)z+"°"};
+                for (int i=0;i<3;i++){
+                    ((TextView)floatingLL.getChildAt(i)).setText(texts[i]);
+                }
+                windowManager.updateViewLayout(floatingLL,wmParams);
+            };
+        }catch (Exception e){
+            CameraUtil.setBoolean(Camera.SP_KEY,true,getApplicationContext());
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
+        try {
+            windowManager.removeViewImmediate(floatingLL);
+        }catch (Exception e){
+
+        }
+        windowManager = null;
+        floatingLL    = null;
+        viewAdded     = false;
+        super.onDestroy();
+    }
+
+    //更新悬浮窗口位置参数
+    private void updateViewPosition(){
+        wmParams.x = (int)(x-mTouchStartX);
+        wmParams.y = (int)(y-mTouchStartY);
+        windowManager.updateViewLayout(floatingLL,wmParams);
+    }
+
+
+    private void initWindow() {
         startForeground(1, new Notification());
         floatingLL = new LinearLayout(this);
         floatingLL.setWeightSum(3);
@@ -68,7 +119,13 @@ public class CameraService extends Service {
         wmParams = new WindowManager.LayoutParams();
 
         //至于手机最顶层
-        wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.KITKAT&&Build.VERSION.SDK_INT<Build.VERSION_CODES.N) {
+            wmParams.type = WindowManager.LayoutParams.TYPE_TOAST;
+        }else if(Build.VERSION.SDK_INT>=26){
+            wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
+        }else{
+            wmParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+        }
         //不接受按键事件
         wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         // 背景色，透明为：PixelFormat.TRANSPARENT
@@ -108,42 +165,9 @@ public class CameraService extends Service {
         });
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if(!viewAdded){
-            viewAdded = true;
-            windowManager.addView(floatingLL,wmParams);
-        }
-        SensorUtil.listener = (x, y, z) -> {
-            if(!viewAdded)return;
-            String[] texts = new String[]{"x: "+(int)x+" °","y: "+(int)y+"°","z: "+(int)z+"°"};
-            for (int i=0;i<3;i++){
-                ((TextView)floatingLL.getChildAt(i)).setText(texts[i]);
-            }
-            windowManager.updateViewLayout(floatingLL,wmParams);
-        };
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
-    public void onDestroy() {
-        stopForeground(true);
-        windowManager.removeViewImmediate(floatingLL);
-        windowManager = null;
-        floatingLL    = null;
-        viewAdded     = false;
-        super.onDestroy();
-    }
-
-    //更新悬浮窗口位置参数
-    private void updateViewPosition(){
-        wmParams.x = (int)(x-mTouchStartX);
-        wmParams.y = (int)(y-mTouchStartY);
-        windowManager.updateViewLayout(floatingLL,wmParams);
-    }
-
 
     public interface SensorListener{
-        void sendSemsor(float x,float y,float z);
+        void sendSemsor(float x, float y, float z);
     }
+
 }

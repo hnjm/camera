@@ -1,5 +1,5 @@
 ##Camera插件使用说明
-* 版本:2.9.0
+* 版本:4.0.0
 
 ##环境配置
 * npm 4.4.1 +
@@ -33,22 +33,37 @@
 ```javascript
     camera: function(){
         //向native发出照相请求
-        cordova.exec(success,error,"CameraMy","coolMethod",["xxxxx_5442415",50,0,1]);
+        //success:成功的回调函数
+        //error:失败的回调函数
+        //CameraMy:插件名,固定值
+        //coolMethod:插件方法，固定值
+        //["xxxxx_5442415",50,0,1,0]:插件方法参数，具体对应以下：
+        //参数1：左下角水印文本第一行，传1时，日期_经纬度 自动添加在第二行
+        //参数2：压缩质量：0-100
+        //参数3：0:不使用,  1:使用角度悬浮窗
+        //参数4：0:不使用,  1:使用水印
+        //参数5：0:相机,    1:打开相册
+        //参数6: 0:相机照片不使用人脸检测,1:相机照片使用人脸检测
+        cordova.exec(success,error,"CameraMy","coolMethod",["xxxxx_5442415",50,0,1,0,0]);
     }
     
     success: function(var result){
-        //base64格式的照片数据
+        //base64格式的照片数据,3.8.0开始，不再返回base64字符串
         var picBase64 = result[0];
         //照片的拍摄角度,手机垂直于地面为90度。
         var angle     = result[1];
-        //x
+        //angleX
         var angleX    = result[2];
-        //y
+        //angleY
         var angleY    = result[3];
-        //z
+        //angleZ
         var angleZ    = result[4];
         //照片的本地路径
         var path      = result[5];
+        //coolMethod的动作类型
+        var cameraType= result[6];
+        //是否在进行人脸检测 0:没有在检测人脸; 1:正在检测人脸.
+        var faceChecking = result[7];
     }
 
     error: function(var result){
@@ -63,6 +78,8 @@
 * 4.x:azimuth 方向角，android/ios端用（磁场+加速度）得到的数据范围是（-180～180）,也就是说，0表示正北，90表示正东，180/-180表示正南，-90表示正西,实际返回为了转成0-360，会全部作+180处理。
     y:pitch   倾斜角   即由静止状态开始，前后翻转
     z:roll    旋转角  即由静止状态开始，左右翻转
+* 6.coolMethod的动作类型：0，相机；1，打开相册
+* 7.是否在检测人脸中: 0,否；1，是
 
 ##问题反馈
   在使用中有任何问题，可以用以下联系方式.

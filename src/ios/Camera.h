@@ -11,6 +11,9 @@
 #import <Cordova/CDVPlugin.h>
 #import <Cordova/CDV.h>
 
+static NSInteger const CAMERA_TYPE_CAMERA = 0;
+static NSInteger const CAMERA_TYPE_ALBUM   = 1;
+
 @interface Camera : CDVPlugin
     
 -(void)coolMethod:(CDVInvokedUrlCommand *)command;

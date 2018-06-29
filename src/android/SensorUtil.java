@@ -55,6 +55,7 @@ public class SensorUtil {
         return angle;
     }
 
+    //恢复方向传感器监听
     public void start(){
         if(sensorManager!=null){
             sensorManager.registerListener(mSensorEventListener, aSensor, SensorManager.SENSOR_DELAY_GAME);
@@ -65,11 +66,13 @@ public class SensorUtil {
 
     }
 
+    //停止方向传感器监听
     public void stop(){
         if(sensorManager!=null)
         sensorManager.unregisterListener(mSensorEventListener);
     }
 
+    //移除传感器监听
     public void removeSensorListener(){
         if(sensorManager!=null){
             uniqueInstance = null;
@@ -82,7 +85,7 @@ public class SensorUtil {
     //角度,手机头部向前，背部向下，与地面水平，则为0度,手机头部向上，与地面垂直，则为90度，手机头部
     //向内，背部向上，与地面水平，则为180度，反正角度为负。
     private int angle;
-    //罗盘方向
+    //罗盘方向：具体参照MD文档说明
     public float x;
     public float y;
     public float z;
@@ -120,23 +123,6 @@ public class SensorUtil {
             if(listener!=null){
                 listener.sendSemsor(x,y,z);
             }
-           /* int type = sensorEvent.sensor.getType();
-            switch (type) {
-                case Sensor.TYPE_ORIENTATION:
-                    //x表示手机指向的方位，0表示北,90表示东，180表示南，270表示西
-                    x = sensorEvent.values[SensorManager.DATA_X];
-                    y = sensorEvent.values[SensorManager.DATA_Y];
-                    z = sensorEvent.values[SensorManager.DATA_Z];
-                    angle = -(int)y;
-
-                    if(listener!=null){
-                        listener.sendSemsor(x,y,z);
-                    }
-                    //LogUtil.d(Camera.TAG,"x="+x);
-                    //LogUtil.d(Camera.TAG,"y="+y);
-                    //LogUtil.d(Camera.TAG,"z="+z);
-                    break;
-            }*/
         }
 
         @Override

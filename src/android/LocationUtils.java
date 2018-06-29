@@ -98,16 +98,19 @@ public class LocationUtils {
     }
 
 
+    //恢复定位监听
     public void start(){
         if(checkPermission())
         getLocation();
     }
 
+    //停止定位监听
     public void stop(){
         if(locationManager!=null&&locationProvider!=null)
             locationManager.removeUpdates(locationListener);
     }
 
+    //检查相关权限
     private boolean checkPermission(){
         if (Build.VERSION.SDK_INT >= 23){
             return  ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED &&
