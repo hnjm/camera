@@ -11,15 +11,22 @@
 #import "CameraWindow.h"
 #import "NSSensorUtil.h"
 #import <CoreMotion/CoreMotion.h>
+#import "NSFaceUtil.h"
 
 @interface Camera()<UIImagePickerControllerDelegate,UINavigationBarDelegate,UINavigationControllerDelegate>
 
 @property(nonatomic,strong)CameraWindow *window;
 @property(nonatomic,copy)NSString *callbackId;
+//用户名
 @property(nonatomic,copy)NSString *name;
+//压缩率：0-100
 @property(nonatomic,assign)CGFloat compression;
+//是否开启角度悬浮窗
 @property(nonatomic,assign)BOOL floatingAngle;
+//是否使用水印
 @property(nonatomic,assign)BOOL watermark;
+//拍照后是否使用人脸检测
+@property(nonatomic,assign)BOOL faceCheck;
 @property(nonatomic,strong)CMMotionManager *motionManager;
 @property(nonatomic,assign)int angle;
 @property(nonatomic,strong)NSMutableArray<NSNumber *> *accelerometerValues;//=new float[3];
@@ -32,6 +39,8 @@
 @property(nonatomic,assign)NSInteger count;
 @property(nonatomic,assign)NSInteger cameraType;
 @property(nonatomic,assign)BOOL scale;
+@property(nonatomic,assign)BOOL isOne;
+@property(nonatomic,strong)NSFaceUtil *faceUtil;
 
 @end
 
@@ -46,15 +55,18 @@
         self.compression = compression/100.0;
     }
     
-    if(command.arguments.count>2){
+    if(command.arguments.count>2)
         self.floatingAngle = [[command.arguments objectAtIndex:2] boolValue];
-    }
-    if(command.arguments.count>3){
+    
+    if(command.arguments.count>3)
         self.watermark = [[command.arguments objectAtIndex:3] boolValue];
-    }
-    if(command.arguments.count>4){
+    
+    if(command.arguments.count>4)
         self.cameraType = [[command.arguments objectAtIndex:4] integerValue];
-    }
+    
+    if(command.arguments.count>5)
+        self.faceCheck = [[command.arguments objectAtIndex:5] integerValue];
+    
     
     self.compression = self.compression<=0?0.8:self.compression;
     //判断权限
@@ -84,13 +96,16 @@
         if(self.floatingAngle)
             self.window = [[CameraWindow alloc] initWithFrame:CGRectMake(0, [NSCameraUtil getStatusBarHeight], 210, 50)];
     }
+    
 }
     
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
+    NSLog(@"---------------------------");
     if(self.cameraType == CAMERA_TYPE_CAMERA){
         //关闭陀螺仪
         [self manager:NO];
         //移除罗盘悬浮窗
+        if(self.floatingAngle)
         [self.window removeFromSuperview];
         self.window = nil;
         //获取照片
@@ -100,44 +115,32 @@
         if ([@"public.image" isEqualToString:mediaType]){
             //获取原始照片
             __block  UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
+            UIImageWriteToSavedPhotosAlbum(image,self,nil,nil);
             //获取时间
             __block  NSString *date = [NSCameraUtil format:@"yyyy-MM-dd HH:mm" andOffset:0];
             NSLog(@"日期=%@",date);
             //获取经纬度
-            __block  BOOL isOnece = YES;
+            self.isOne = YES;
             [MoLocationManager getMoLocationWithSuccess:^(double lat, double lng){
-                isOnece = NO;
-                if(self.watermark){
-                //只打印一次经纬度
-                    NSLog(@"经纬度 lat lng (%f, %f)", lat, lng);
-                    NSString *location = [NSString stringWithFormat:@"(%f%f)",lat,lng];
-                //加水印
-                    image = [NSCameraUtil imageWithLogoText:image andText:[NSString stringWithFormat:@"%@%@",date,location] andLeftOffset:14 andBottomOffset:68];
-                    image = [NSCameraUtil imageWithLogoText:image andText:self.name andLeftOffset:14 andBottomOffset:14];
-                    NSLog(@"水印图片image=%@", image);
-                }
-                //压缩图片
-                NSData *data = UIImageJPEGRepresentation(image, self.compression);
-                UIImage *compressionImage = [UIImage imageWithData:data];
+                if(self.isOne==NO)return ;
+                self.isOne = NO;
                 
-                //保存到本地
-                NSTimeInterval nowtime = [[NSDate date] timeIntervalSince1970]*1000;
-                long long millionTime = [[NSNumber numberWithDouble:nowtime] longLongValue];
-                NSString *path = [NSCameraUtil getImageSavePath:[NSString stringWithFormat:@"%d_%lld.jpg",(int)self.angelX,millionTime]];
-                [NSCameraUtil saveImage:compressionImage andPath:path];
-                NSLog(@"水印图片地址path=%@", path);
-                //转成base64
-                NSString *base64 = /*[data base64EncodedStringWithOptions:0]*/@"";
-                NSLog(@"角度angle=%d",self.angle);
-                //将结果回传给js
-                [self successWithMessage:@[base64,[NSNumber numberWithInt:self.angle],[NSNumber numberWithInt:(int)self.angelX],[NSNumber numberWithInt:(int)self.angelY],[NSNumber numberWithInt:(int)self.angelZ],path]];
-                if (!isOnece) {
+                //人脸检测
+                if(self.faceCheck){
+                    self.faceUtil = [NSFaceUtil new];
+                    NSLog(@"****************");
+                    [self.faceUtil checkFace:image andVC:self andLat:lat andLng:lng andDate:date];
+                }else{
+                    [self continueDisposeBitmap:image andLat:lat andLng:lng andDate:date];
+                }
+                
+                if (!self.isOne) {
                     [MoLocationManager stop];
                 }
             } Failure:^(NSError *error){
-                isOnece = NO;
+                self.isOne = NO;
                 [self faileWithMessage:@"定位失败!"];
-                if (!isOnece) {
+                if (!self.isOne) {
                     [MoLocationManager stop];
                 }
             }];
@@ -164,7 +167,7 @@
         //转成base64
         NSString *base64 = /*[data base64EncodedStringWithOptions:0]*/@"";
         //将结果回传给js
-        [self successWithMessage:@[base64,[NSNumber numberWithInt:0],[NSNumber numberWithInt:0],[NSNumber numberWithInt:0],[NSNumber numberWithInt:0],path]];
+        [self successWithMessage:@[base64,[NSNumber numberWithInt:0],[NSNumber numberWithInt:0],[NSNumber numberWithInt:0],[NSNumber numberWithInt:0],path,[NSNumber numberWithInteger:NORMAL]]];
         self.scale = NO;
     }
     [picker dismissViewControllerAnimated:YES completion:nil];
@@ -175,7 +178,33 @@
     //退出相机/相册
     [picker dismissViewControllerAnimated:YES completion:nil];
 }
-    
+
+-(void)continueDisposeBitmap:(UIImage *)image andLat:(float)lat andLng:(float)lng andDate:(NSString *)date{
+    if(self.watermark){
+        //只打印一次经纬度
+        NSLog(@"经纬度 lat lng (%f, %f)", lat, lng);
+        NSString *location = [NSString stringWithFormat:@"(%f%f)",lat,lng];
+        //加水印
+        image = [NSCameraUtil imageWithLogoText:image andText:[NSString stringWithFormat:@"%@%@",date,location] andLeftOffset:14 andBottomOffset:68];
+        image = [NSCameraUtil imageWithLogoText:image andText:self.name andLeftOffset:14 andBottomOffset:14];
+        NSLog(@"水印图片image=%@", image);
+    }
+    //压缩图片
+    NSData *data = UIImageJPEGRepresentation(image, self.compression);
+    UIImage *compressionImage = [UIImage imageWithData:data];
+    //保存到本地
+    NSTimeInterval nowtime = [[NSDate date] timeIntervalSince1970]*1000;
+    long long millionTime = [[NSNumber numberWithDouble:nowtime] longLongValue];
+    NSString *path = [NSCameraUtil getImageSavePath:[NSString stringWithFormat:@"%d_%lld.jpg",(int)self.angelX,millionTime]];
+    [NSCameraUtil saveImage:compressionImage andPath:path];
+    NSLog(@"水印图片地址path=%@", path);
+    //转成base64
+    NSString *base64 = /*[data base64EncodedStringWithOptions:0]*/@"";
+    NSLog(@"角度angle=%d",self.angle);
+    //将结果回传给js
+    [self successWithMessage:@[base64,[NSNumber numberWithInt:self.angle],[NSNumber numberWithInt:(int)self.angelX],[NSNumber numberWithInt:(int)self.angelY],[NSNumber numberWithInt:(int)self.angelZ],path,[NSNumber numberWithInteger:NORMAL]]];
+}
+
 -(void)successWithMessage:(NSArray *)messages{
     if(self.callbackId==nil)return;
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:messages];

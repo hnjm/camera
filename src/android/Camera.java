@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -58,6 +59,9 @@ public class Camera extends CordovaPlugin{
     public final static int CAMERA_TYPE_ALBUM  = 1;
 
     //status:动作的状态
+    //正常
+    public final static int NORMAL        = 0;
+    //正在人脸检测
     public final static int FACE_CHECKING = 1;
 
     //相机返回码
@@ -221,10 +225,12 @@ public class Camera extends CordovaPlugin{
                         return;
                     }
 
+
+
                     //压缩图片
                     Bitmap bitmap = CameraUtil.decodeSampleBitmap(CameraUtil.filePath,targetWidth,targetHeight);
 
-                    //人脸识别
+                    //人脸检测
                     if(faceCheck) {
                         faceUtil = new FaceUtil();
                         sendResultFaceChecking();
@@ -350,6 +356,7 @@ public class Camera extends CordovaPlugin{
                 array.put(4, (int)angelZ);
                 array.put(5, filePath);
                 array.put(6,cameraType);
+                array.put(7,NORMAL);
                 pluginResult = new PluginResult(PluginResult.Status.OK, array);
                 pluginResult.setKeepCallback(true);
                 callbackContext.sendPluginResult(pluginResult);
@@ -379,6 +386,7 @@ public class Camera extends CordovaPlugin{
             array.put(4, 0);
             array.put(5, filePath);
             array.put(6,cameraType);
+            array.put(7,NORMAL);
             pluginResult = new PluginResult(PluginResult.Status.OK, array);
             pluginResult.setKeepCallback(true);
             callbackContext.sendPluginResult(pluginResult);

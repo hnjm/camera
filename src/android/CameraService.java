@@ -18,7 +18,6 @@ import android.widget.TextView;
 
 
 
-
 /**
  * Created by liangzhongtai on 2016/7/16.
  * 相机罗盘悬浮窗
