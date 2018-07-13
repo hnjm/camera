@@ -12,7 +12,7 @@
 #import "NSSensorUtil.h"
 #import <CoreMotion/CoreMotion.h>
 #import "NSFaceUtil.h"
-
+#import "FaceWindow.h"
 @interface Camera()<UIImagePickerControllerDelegate,UINavigationBarDelegate,UINavigationControllerDelegate>
 
 @property(nonatomic,strong)CameraWindow *window;
@@ -27,6 +27,8 @@
 @property(nonatomic,assign)BOOL watermark;
 //拍照后是否使用人脸检测
 @property(nonatomic,assign)BOOL faceCheck;
+//是否使用前置摄像头
+@property(nonatomic,assign)BOOL preCamera;
 @property(nonatomic,strong)CMMotionManager *motionManager;
 @property(nonatomic,assign)int angle;
 @property(nonatomic,strong)NSMutableArray<NSNumber *> *accelerometerValues;//=new float[3];
@@ -41,7 +43,8 @@
 @property(nonatomic,assign)BOOL scale;
 @property(nonatomic,assign)BOOL isOne;
 @property(nonatomic,strong)NSFaceUtil *faceUtil;
-
+@property(nonatomic,strong)UIImageView *faceIV;
+@property(nonatomic,strong)FaceWindow *faceWindow;
 @end
 
 @implementation Camera
@@ -67,6 +70,8 @@
     if(command.arguments.count>5)
         self.faceCheck = [[command.arguments objectAtIndex:5] integerValue];
     
+    if(command.arguments.count>6)
+        self.preCamera = [[command.arguments objectAtIndex:6] integerValue];
     
     self.compression = self.compression<=0?0.8:self.compression;
     //判断权限
@@ -89,6 +94,11 @@
     picker.delegate = self;
     picker.allowsEditing = NO;
     picker.sourceType = sourceType;
+    if(self.preCamera){
+        picker.cameraDevice = UIImagePickerControllerCameraDeviceFront;
+    }else{
+        picker.cameraDevice = UIImagePickerControllerCameraDeviceRear;
+    }
     [self.viewController presentViewController:picker animated:YES completion:nil];
     //获取手机拍摄角度
     if(self.cameraType == CAMERA_TYPE_CAMERA){
@@ -96,7 +106,9 @@
         if(self.floatingAngle)
             self.window = [[CameraWindow alloc] initWithFrame:CGRectMake(0, [NSCameraUtil getStatusBarHeight], 210, 50)];
     }
-    
+    if(self.faceCheck){
+        self.faceWindow = [[FaceWindow alloc] initWithFrame:CGRectMake(0, [NSCameraUtil getStatusBarHeight],[[UIScreen mainScreen] bounds].size.width/3, [[UIScreen mainScreen] bounds].size.height/3)];
+    }
 }
     
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info{
@@ -113,6 +125,19 @@
         NSLog(@"已经关闭相机=%@",mediaType);
         // 判断获取类型：图片
         if ([@"public.image" isEqualToString:mediaType]){
+            NSArray *features = nil;
+            if(self.faceCheck){
+                self.faceIV =  [self.faceWindow setFaceIV:info[UIImagePickerControllerOriginalImage]];
+                NSDictionary *imageOptions =  [NSDictionary dictionaryWithObject:@(5) forKey:CIDetectorImageOrientation];
+                CIImage *personciImage = [CIImage imageWithCGImage:self.faceIV.image.CGImage];
+                NSDictionary *opts = [NSDictionary dictionaryWithObject:
+                                  CIDetectorAccuracyHigh forKey:CIDetectorAccuracy];
+                CIDetector *faceDetector=[CIDetector detectorOfType:CIDetectorTypeFace context:nil options:opts];
+                features = [faceDetector featuresInImage:personciImage options:imageOptions];
+                [self.faceWindow removeFromSuperview];
+                self.faceWindow = nil;
+                NSLog(@"features.count=%ld",features.count);
+            }
             //获取原始照片
             __block  UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
             UIImageWriteToSavedPhotosAlbum(image,self,nil,nil);
@@ -129,7 +154,7 @@
                 if(self.faceCheck){
                     self.faceUtil = [NSFaceUtil new];
                     NSLog(@"****************");
-                    [self.faceUtil checkFace:image andVC:self andLat:lat andLng:lng andDate:date];
+                    [self.faceUtil checkFace:image andVC:self andLat:lat andLng:lng andDate:date andArray:features];
                 }else{
                     [self continueDisposeBitmap:image andLat:lat andLng:lng andDate:date];
                 }

@@ -10,6 +10,6 @@
 
 @interface NSFaceUtil : NSObject
 
--(void)checkFace:(UIImage *)image andVC:(Camera *)cordova andLat:(float)lat andLng:(float)lng andDate:(NSString *)date;
+-(void)checkFace:(UIImage *)image andVC:(Camera *)cordova andLat:(float)lat andLng:(float)lng andDate:(NSString *)date andArray:(NSArray *)features;
 
 @end

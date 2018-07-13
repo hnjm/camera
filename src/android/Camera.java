@@ -94,6 +94,8 @@ public class Camera extends CordovaPlugin{
     public boolean enterCamera;
     //拍照后是否使用人脸检测
     public boolean faceCheck;
+    //
+    public boolean preCamera;
     //插件动作
     public static int cameraType = CAMERA_TYPE_CAMERA;
     private CallbackContext callbackContext;
@@ -129,7 +131,8 @@ public class Camera extends CordovaPlugin{
                 cameraType= args.getInt(4);
             if(args.length()>5)
                 faceCheck = args.getInt(5)==1;
-
+            if(args.length()>6)
+                preCamera = args.getInt(6)==1;
             if(cameraType == CAMERA_TYPE_CAMERA
                     && Build.VERSION.SDK_INT>=Build.VERSION_CODES.N
                     &&CameraUtil.getBoolean(SP_KEY,cordova.getContext())){
@@ -277,7 +280,7 @@ public class Camera extends CordovaPlugin{
 
                 enterCamera = true;
                 //打开相机
-                CameraUtil.showCamera(cordova, this, RESULTCODE_CAMERA);
+                CameraUtil.showCamera(cordova, this, RESULTCODE_CAMERA,preCamera);
             }
 
         }else{

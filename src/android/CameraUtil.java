@@ -48,12 +48,14 @@ public class CameraUtil {
     public static int dataType;
 
     //打开系统相机
-    public static  void showCamera(CordovaInterface cordova, CordovaPlugin plugin, int resultCode){
+    public static  void showCamera(CordovaInterface cordova, CordovaPlugin plugin, int resultCode,boolean preCamera){
 
         LogUtil.setLog(true);
         // 调用系统相机
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
+        if(preCamera)
+        intent.putExtra("android.intent.extras.CAMERA_FACING", 1);
         // 取当前时间为照片名
         fileName = System.currentTimeMillis()+ ".jpg";
         filePath = getPhotoPath() + fileName;

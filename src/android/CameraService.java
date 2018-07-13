@@ -121,7 +121,8 @@ public class CameraService extends Service {
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.KITKAT&&Build.VERSION.SDK_INT<Build.VERSION_CODES.N) {
             wmParams.type = WindowManager.LayoutParams.TYPE_TOAST;
         }else if(Build.VERSION.SDK_INT>=26){
-            wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
+            //wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
+            wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
         }else{
             wmParams.type = WindowManager.LayoutParams.TYPE_PHONE;
         }

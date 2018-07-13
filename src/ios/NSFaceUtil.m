@@ -21,21 +21,8 @@
  *lng:纬度
  *date:拍照日期
  */
--(void)checkFace:(UIImage *)image andVC:(Camera *)cordova andLat:(float)lat andLng:(float)lng andDate:(NSString *)date{
+-(void)checkFace:(UIImage *)image andVC:(Camera *)cordova andLat:(float)lat andLng:(float)lng andDate:(NSString *)date andArray:(NSArray *)features{
     [cordova successWithMessage:@[@"",[NSNumber numberWithInt:0],[NSNumber numberWithInt:0],[NSNumber numberWithInt:0],[NSNumber numberWithInt:0],@"",[NSNumber numberWithInteger:FACE_CHECKING]]];
-    NSLog(@"image=%@",image);
-    UIImageView *iv = [UIImageView new];
-    iv.frame = CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height);
-    iv.contentMode = UIViewContentModeScaleAspectFit;
-    iv.image = image;
-    
-    CIImage* ciimage = [CIImage imageWithCGImage:iv.image.CGImage];
-    NSDictionary* opts = [NSDictionary dictionaryWithObject:
-                          CIDetectorAccuracyHigh forKey:CIDetectorAccuracy];
-    CIDetector* detector = [CIDetector detectorOfType:CIDetectorTypeFace
-                                              context:nil options:opts];
-    //所有的人脸数据
-    NSArray* features = [detector featuresInImage:ciimage];
     NSLog(@"检测到的人脸数=%ld个",features.count);
     if (features==nil||features.count == 0) {
         NSLog(@"未检测到人脸");
