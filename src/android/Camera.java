@@ -94,7 +94,6 @@ public class Camera extends CordovaPlugin{
     public boolean enterCamera;
     //拍照后是否使用人脸检测
     public boolean faceCheck;
-    //
     public boolean preCamera;
     //插件动作
     public static int cameraType = CAMERA_TYPE_CAMERA;

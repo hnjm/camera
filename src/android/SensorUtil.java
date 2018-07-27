@@ -116,7 +116,10 @@ public class SensorUtil {
             //经过SensorManager.getOrientation(rotate, values);得到的values值为弧度
             //转换为角度
             //-180~180转成0-360
-            x = values[0]=(float)Math.toDegrees(values[0])+180;
+            x = values[0]=(float)Math.toDegrees(values[0])/*+180*/;
+            if(x<0){
+                x = Math.abs(x)+180;
+            }
             y = values[1]=(float)Math.toDegrees(values[1]);
             z = values[2]=(float)Math.toDegrees(values[2]);
             angle = -(int)y;

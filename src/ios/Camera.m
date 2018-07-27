@@ -287,7 +287,10 @@
                 self.values = [NSSensorUtil getOrientation:self.rotate andValues:self.values];
                 //经过SensorManager.getOrientation(rotate, values);得到的values值为弧度
                 //转换为角度
-                self.angelX = SK_RADIANS_TO_DEGREES([self.values[0] floatValue]) + 180;
+                self.angelX = SK_RADIANS_TO_DEGREES([self.values[0] floatValue]) /*+ 180*/;
+                if(self.angelX<0){
+                    self.angelX = fabs(self.angelX) + 180;
+                }
                 self.angelY = SK_RADIANS_TO_DEGREES([self.values[1] floatValue]);
                 self.angelZ = SK_RADIANS_TO_DEGREES([self.values[2] floatValue]);
                 //获取手机的倾斜角度(zTheta是手机与水平面的夹角， xyTheta是手机绕自身旋转的角度)：
