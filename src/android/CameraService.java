@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -15,7 +17,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 
 
 /**
@@ -31,6 +35,7 @@ public class CameraService extends Service {
    private float x;
    private float y;
    private boolean viewAdded;
+   private static long lastTime;
 
 
 
@@ -48,23 +53,52 @@ public class CameraService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(windowManager == null){
+            // Log.d(Camera.TAG,"************************(windowManager == null)");
             initWindow();
         }
         try {
-            if(!viewAdded){
+            // Log.d(Camera.TAG,"************************(!viewAdded)="+!viewAdded);
+            if (!viewAdded) {
                 viewAdded = true;
                 windowManager.addView(floatingLL,wmParams);
+                Log.d(Camera.TAG,"************************(addView)");
             }
             SensorUtil.listener = (x, y, z) -> {
-                if(!viewAdded)return;
+                // Log.d(Camera.TAG,"************************listener="+!viewAdded);
+                if (!viewAdded) {
+                    return;
+                }
                 String[] texts = new String[]{"x: "+(int)x+" °","y: "+(int)y+"°","z: "+(int)z+"°"};
                 for (int i=0;i<3;i++){
                     ((TextView)floatingLL.getChildAt(i)).setText(texts[i]);
                 }
+                int min = Camera.angleTip == 0 ? 10 : (Camera.angleTip - 10);
+                int max = Camera.angleTip == 0 ? 350 : Camera.angleTip + 10;
+                if ((Camera.angleTip == 0 && (x > max || x < min)) || (Camera.angleTip != 0 && (x > min && x < max))) {
+                    if (System.currentTimeMillis() - lastTime < 1500) {
+                        return;
+                    }
+                    lastTime = System.currentTimeMillis();
+                    Handler handlerThree = new Handler(Looper.getMainLooper());
+                    handlerThree.post(new Runnable(){
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), Camera.angleTip + "度,请拍照", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
                 windowManager.updateViewLayout(floatingLL,wmParams);
+                // Log.d(Camera.TAG,"************************(updateViewLayout)");
             };
         }catch (Exception e){
+            e.printStackTrace();
+            // Log.d(Camera.TAG,"************************error="+e.toString());
+            viewAdded = false;
+            //windowManager.removeView(floatingLL);
+            //viewAdded = true;
+            //windowManager.addView(floatingLL,wmParams);
             CameraUtil.setBoolean(Camera.SP_KEY,true,getApplicationContext());
+            return super.onStartCommand(intent, flags, startId);
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -76,18 +110,19 @@ public class CameraService extends Service {
             windowManager.removeViewImmediate(floatingLL);
         }catch (Exception e){
 
+        }finally {
+            windowManager = null;
+            floatingLL    = null;
+            viewAdded     = false;
+            super.onDestroy();
         }
-        windowManager = null;
-        floatingLL    = null;
-        viewAdded     = false;
-        super.onDestroy();
     }
 
-    //更新悬浮窗口位置参数
+    // 更新悬浮窗口位置参数
     private void updateViewPosition(){
         wmParams.x = (int)(x-mTouchStartX);
         wmParams.y = (int)(y-mTouchStartY);
-        windowManager.updateViewLayout(floatingLL,wmParams);
+        windowManager.updateViewLayout(floatingLL, wmParams);
     }
 
 
@@ -118,12 +153,14 @@ public class CameraService extends Service {
         wmParams = new WindowManager.LayoutParams();
 
         //至于手机最顶层
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.KITKAT&&Build.VERSION.SDK_INT<Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             wmParams.type = WindowManager.LayoutParams.TYPE_TOAST;
-        }else if(Build.VERSION.SDK_INT>=26){
+        } else if (Build.VERSION.SDK_INT>=26) {
             //wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
             wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        }else{
+        } else if (Build.VERSION.SDK_INT==25) {
+            wmParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        } else {
             wmParams.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
         //不接受按键事件
@@ -142,6 +179,7 @@ public class CameraService extends Service {
         wmParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
         floatingLL.setOnTouchListener((v, event) -> {
+            // if(viewAdded)
             //获取相对屏幕的坐标，即以屏幕左上角为原点
             x = event.getRawX();
             // 25是系统状态栏的高度，也可以通过方法得到准确的值，自己微调就是了
@@ -150,7 +188,7 @@ public class CameraService extends Service {
                 case MotionEvent.ACTION_DOWN:
                     //获取相对View的坐标，即以此View左上角为原点
                     mTouchStartX = event.getX();
-                    mTouchStartY = event.getY()+floatingLL.getHeight()/2;
+                    mTouchStartY = event.getY() + floatingLL.getHeight()/2;
                     break;
                 case MotionEvent.ACTION_MOVE:
                     updateViewPosition();

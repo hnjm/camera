@@ -58,7 +58,7 @@
             R[0]  = [NSNumber numberWithFloat:Hx];    R[1]  = [NSNumber numberWithFloat:Hy];    R[2]  = [NSNumber numberWithFloat:Hz];   R[3]  = [NSNumber numberWithInteger:0];
             R[4]  = [NSNumber numberWithFloat:Mx];    R[5]  = [NSNumber numberWithFloat:My];    R[6]  = [NSNumber numberWithFloat:Mz];   R[7]  = [NSNumber numberWithInteger:0];
             R[8]  = [NSNumber numberWithFloat:Ax];    R[9]  = [NSNumber numberWithFloat:Ay];    R[10] = [NSNumber numberWithFloat:Az];   R[11] = [NSNumber numberWithInteger:0];
-            R[12] = [NSNumber numberWithInteger:0];     R[13] = [NSNumber numberWithInteger:0];     R[14] = [NSNumber numberWithInteger:0];    R[15] = [NSNumber numberWithInteger:1];
+            R[12] = [NSNumber numberWithInteger:0];   R[13] = [NSNumber numberWithInteger:0];   R[14] = [NSNumber numberWithInteger:0];    R[15] = [NSNumber numberWithInteger:1];
         }
     }
     
@@ -70,13 +70,13 @@
         float c = (Ex*Mx + Ey*My + Ez*Mz) * invE;
         float s = (Ex*Ax + Ey*Ay + Ez*Az) * invE;
         if (I.count == 9) {
-            I[0] = [NSNumber numberWithInteger:1];     I[1] = [NSNumber numberWithInteger:0];     I[2] = [NSNumber numberWithInteger:0];
+            I[0] = [NSNumber numberWithInteger:1];     I[1] = [NSNumber numberWithInteger:0];   I[2] = [NSNumber numberWithInteger:0];
             I[3] = [NSNumber numberWithInteger:0];     I[4] = [NSNumber numberWithFloat:c];     I[5] = [NSNumber numberWithFloat:s];
-            I[6] = [NSNumber numberWithInteger:0];     I[7] =[NSNumber numberWithFloat:-s];     I[8] = [NSNumber numberWithFloat:c];
+            I[6] = [NSNumber numberWithInteger:0];     I[7] = [NSNumber numberWithFloat:-s];    I[8] = [NSNumber numberWithFloat:c];
         } else if (I.count== 16) {
-            I[0] = [NSNumber numberWithInteger:1];     I[1] = [NSNumber numberWithInteger:0];     I[2] = [NSNumber numberWithInteger:0];
-            I[4] = [NSNumber numberWithInteger:0];     I[5] = [NSNumber numberWithFloat:c];     I[6] = [NSNumber numberWithFloat:s];
-            I[8] = [NSNumber numberWithInteger:0];     I[9] =[NSNumber numberWithFloat:-s];     I[10]= [NSNumber numberWithFloat:c];
+            I[0] = [NSNumber numberWithInteger:1];     I[1] = [NSNumber numberWithInteger:0];    I[2] = [NSNumber numberWithInteger:0];
+            I[4] = [NSNumber numberWithInteger:0];     I[5] = [NSNumber numberWithFloat:c];      I[6] = [NSNumber numberWithFloat:s];
+            I[8] = [NSNumber numberWithInteger:0];     I[9] = [NSNumber numberWithFloat:-s];     I[10]= [NSNumber numberWithFloat:c];
             I[3] = I[7] = I[11] = I[12] = I[13] = I[14] = [NSNumber numberWithInteger:0];
             I[15] = [NSNumber numberWithInteger:1];
         }

@@ -1,28 +1,37 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="com.chinamobile.gdwy.camera" version="4.9.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="com.chinamobile.gdwy.camera" version="5.8.8" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>camera</name>
     <js-module name="CameraMy" src="www/camera.js">
         <clobbers target="cordova.plugins.camera" />
     </js-module>
 	
 	 <platform name="android">
-        <!-- 相机插件 -->
-        <config-file target="res/xml/config.xml" parent="/*">
+         <!-- 相机插件 -->
+         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="CameraMy">
                 <param name="android-package" value="com.chinamobile.gdwy.Camera"/>
             </feature>
-        </config-file>
-        <!-- 权限 -->
-        <config-file target="AndroidManifest.xml" parent="/*">
+         </config-file>
+         <!-- 权限 -->
+         <config-file target="AndroidManifest.xml" parent="/*">
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
             <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
             <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
             <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
             <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-        </config-file>
+            <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
+            <uses-permission android:name="android.permission.CAMERA" />
+            <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
-        <!-- 适配sdk24及以上 -->
-        <config-file target="AndroidManifest.xml" parent="application">
+            <!-- 友盟统计权限 -->
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+            <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+            <uses-permission android:name="android.permission.INTERNET"/>
+         </config-file>
+
+         <!-- 适配sdk24及以上 -->
+         <config-file target="AndroidManifest.xml" parent="application">
             <provider
                 android:name="com.chinamobile.gdwy.FileProvider"
                 android:authorities="${applicationId}.provider"
@@ -32,29 +41,122 @@
                     android:name="android.support.FILE_PROVIDER_PATHS"
                     android:resource="@xml/cameramy_provider_paths"/>
             </provider>
-        </config-file>
+         </config-file>
 
-        <!-- 四大组件 -->
-        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+         <!-- 四大组件 -->
+         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <service
                 android:name="com.chinamobile.gdwy.CameraService"
                 android:enabled="true"
                 android:exported="false">
             </service>
-        </config-file>
+            <service
+                android:name="com.chinamobile.gdwy.GuardService"
+                android:enabled="true"
+                android:exported="false">
+            </service>
+            <service
+                android:name="com.chinamobile.gdwy.DataService"
+                android:enabled="true"
+                android:exported="false">
+            </service>
+            <activity
+                android:name="com.chinamobile.gdwy.CameraEditActivity"
+                android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
+             <!-- 友盟APPKEY，Channel -->
+             <meta-data
+                 android:name="UMENG_APPKEY"
+                 android:value="5e702d1b570df3842300032f" />
+             <meta-data android:name="UMENG_CHANNEL" android:value="gmcc" />
+         </config-file>
 
-        <!-- 项目文件 -->
-        <source-file src="src/android/xml/cameramy_provider_paths.xml" target-dir="res/xml" />
-        <source-file src="src/android/Camera.java"        target-dir="src/com/chinamobile/gdwy" />
-        <source-file src="src/android/CameraUtil.java"    target-dir="src/com/chinamobile/gdwy" />
-        <source-file src="src/android/FileProvider.java"  target-dir="src/com/chinamobile/gdwy" />
-        <source-file src="src/android/LocationUtils.java" target-dir="src/com/chinamobile/gdwy" />
-        <source-file src="src/android/LogUtil.java"       target-dir="src/com/chinamobile/gdwy" />
-        <source-file src="src/android/SensorUtil.java"    target-dir="src/com/chinamobile/gdwy" />
-        <source-file src="src/android/CameraService.java" target-dir="src/com/chinamobile/gdwy" />
-        <source-file src="src/android/FaceUtil.java"      target-dir="src/com/chinamobile/gdwy" />
+         <!-- 项目文件 -->
+         <source-file src="src/android/xml/cameramy_provider_paths.xml" target-dir="res/xml" />
 
-		<framework src="com.android.support:support-v4:27.1.0"/>
+         <source-file src="src/android/layout/snap_shot_layout.xml"    target-dir="res/layout" />
+
+         <source-file src="src/android/drawable/seekbar_bg.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_arrow.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_blue.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_green.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_line.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_masaic.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_purple.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_red.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_ring.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_text.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_white.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_checkbox_yellow.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/selector_seekbar.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_blue.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_blue_sel.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_colorprimary.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_green.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_green_sel.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_purple.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_purple_sel.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_red.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_red_sel.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_white.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_white_sel.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_yellow.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_checkbox_solid_yellow_sel.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_edittext_white.xml" target-dir="res/drawable" />
+         <source-file src="src/android/drawable/shape_seekbar_solid_blue.xml" target-dir="res/drawable" />
+
+         <source-file src="src/android/mipmap/arrow.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/arrow_sel.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/back.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/cancel.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/last_step.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/line.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/line_sel.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/masaic.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/masaic_sel.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/pre_step.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/ring.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/ring_sel.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/texts.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+         <source-file src="src/android/mipmap/texts_sel.png" target-dir="app/src/main/res/mipmap-xxxhdpi" />
+
+         <source-file src="src/android/Camera.java"        target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/CameraEditActivity.java"        target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/DataService.java"        target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/GuardService.java"        target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/LineInfo.java"        target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/PaintableImageView.java"        target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/PointInfo.java"        target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/CameraUtil.java"    target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/FileProvider.java"  target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/LocationUtils.java" target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/LogUtil.java"       target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/SensorUtil.java"    target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/CameraService.java" target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/FaceUtil.java"      target-dir="src/com/chinamobile/gdwy" />
+
+         <source-file src="src/android/Checker.java"       target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/CompressionPredicate.java"    target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/Engine.java"        target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/InputStreamProvider.java"     target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/Luban.java"         target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/OnCompressListener.java"      target-dir="src/com/chinamobile/gdwy" />
+         <source-file src="src/android/OnRenameListener.java"        target-dir="src/com/chinamobile/gdwy" />
+
+         <source-file src="src/android/MyApplication.java"        target-dir="src/com/chinamobile/gdwy" />
+
+		 <framework src="com.android.support:support-v4:27.1.0"/>
+
+         <!-- 友盟统计jar/so包-->
+         <source-file src="src/android/SecurityEnvSDK-release-1.1.0.jar" target-dir="app/libs"/>
+         <source-file src="src/android/umeng-analytics-8.1.6.jar" target-dir="app/libs"/>
+         <source-file src="src/android/umeng-common-2.2.5.jar" target-dir="app/libs"/>
+         <source-file src="src/android/utdid4all-1.1.5.3_proguard.jar" target-dir="app/libs"/>
+
+         <source-file src="src/android/armeabi-v7a/libsecurityenv.so" target-dir="app/jniLibs/armeabi-v7a"/>
+         <source-file src="src/android/x86/libsecurityenv.so" target-dir="app/jniLibs/x86"/>
+
+         <!-- hooks -->
+         <hook type="after_platform_add" src="hooks/camera_after_platform.js" />
     </platform>
     
     <platform name="ios">
@@ -106,5 +208,13 @@
 		<source-file src="src/ios/NSFaceUtil.m" />
 		<header-file src="src/ios/FaceWindow.h" />
 		<source-file src="src/ios/FaceWindow.m" />
+
+        <!-- 友盟插件 -->
+        <framework src="libz.tbd" />
+        <framework src="libsqlite3.tbd" />
+
+        <framework src="src/ios/UMAnalytics.framework" custom="true" />
+        <framework src="src/ios/UMCommon.framework" custom="true" />
+        <framework src="src/ios/UTDID.framework" custom="true" />
     </platform>
 </plugin>

@@ -5,6 +5,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
+
+import java.util.Arrays;
 
 /**
  * Created by liangzhongtai on 2018/5/21.
@@ -45,8 +48,8 @@ public class SensorUtil {
 
         aSensor=sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensor=sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        sensorManager.registerListener(mSensorEventListener, aSensor, SensorManager.SENSOR_DELAY_GAME);
-        sensorManager.registerListener(mSensorEventListener, mSensor, SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(mSensorEventListener, aSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(mSensorEventListener, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
         LogUtil.d(Camera.TAG,"方向传感器初始化完毕");
     }
 
@@ -68,8 +71,9 @@ public class SensorUtil {
 
     //停止方向传感器监听
     public void stop(){
-        if(sensorManager!=null)
-        sensorManager.unregisterListener(mSensorEventListener);
+        if(sensorManager!=null) {
+            sensorManager.unregisterListener(mSensorEventListener);
+        }
     }
 
     //移除传感器监听
@@ -99,11 +103,13 @@ public class SensorUtil {
     private SensorEventListener mSensorEventListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-            long nowTime =System.currentTimeMillis();
-            if(nowTime-distance<500){
+            //Log.d(Camera.TAG,"方向传感器1");
+            long nowTime = System.currentTimeMillis();
+            if(nowTime-distance<100){
                 return;
             }
             distance = nowTime;
+            //Log.d(Camera.TAG,"方向传感器2="+sensorEvent.sensor.getType());
             if(sensorEvent.sensor.getType()==Sensor.TYPE_ACCELEROMETER){
                 accelerometerValues=sensorEvent.values;
             }
@@ -113,17 +119,21 @@ public class SensorUtil {
 
             SensorManager.getRotationMatrix(rotate, null, accelerometerValues, magneticFieldValues);
             SensorManager.getOrientation(rotate, values);
+            //Log.d(Camera.TAG,"方向传感器3");
             //经过SensorManager.getOrientation(rotate, values);得到的values值为弧度
             //转换为角度
             //-180~180转成0-360
+            //Log.d(Camera.TAG,"方向传感器4="+ Arrays.toString(values));
             x = values[0]=(float)Math.toDegrees(values[0])/*+180*/;
             if(x<0){
-                x = Math.abs(x)+180;
+                x = x+360;
             }
             y = values[1]=(float)Math.toDegrees(values[1]);
             z = values[2]=(float)Math.toDegrees(values[2]);
             angle = -(int)y;
+            //Log.d(Camera.TAG,"方向传感器5="+listener);
             if(listener!=null){
+                //Log.d(Camera.TAG,"方向传感器6="+x);
                 listener.sendSemsor(x,y,z);
             }
         }

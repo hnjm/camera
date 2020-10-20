@@ -18,12 +18,14 @@ public class FaceUtil {
     private final int N_MAX = 2;
     private Camera cordova;
     private Bitmap oriBitmap;
+    private String path;
     /**
      * 初始化人脸识别的图片
      * @param bitmap:要检测的图片
      * */
-    public void initFace(Camera cordova,Bitmap bitmap){
+    public void initFace(Camera cordova,String path,Bitmap bitmap){
         this.cordova = cordova;
+        this.path = path;
         oriBitmap = bitmap;
         srcFace = bitmap.copy(Bitmap.Config.RGB_565, true);
         int w = srcFace.getWidth();
@@ -44,7 +46,7 @@ public class FaceUtil {
         Message message = new Message();
         if(possibleFace==0){
             message.what = Camera.HANDLER_CHECK_NOT;
-            message.obj = "照片检测不到人脸,请重新拍照";
+            message.obj = path;
             cordova.mHandler.sendMessage(message);
             return null;
         }
@@ -73,12 +75,12 @@ public class FaceUtil {
         }
         if(effect==0){
             message.what = Camera.HANDLER_CHECK_NOT;
-            message.obj = "照片检测不到人脸,请重新拍照";
+            message.obj = path;
         }else if(effect==1){
-            message.obj = oriBitmap;
             message.what = Camera.HANDLER_CHECK_PASS;
+            message.obj = path;
         }else{
-            message.what = Camera.HANDLER_CHECK_NOT;
+            message.what = Camera.HANDLER_CHECK_MORE;
             message.obj = "检测到人脸个数大于1,请重新拍照";
         }
         if(cordova!=null)

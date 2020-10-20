@@ -65,10 +65,10 @@
     return sizeToFit.height + (tv?16.0:0);
 }
 
-+(UIImage *)imageWithLogoText:(UIImage *)img andText:(NSString *)text andLeftOffset:(CGFloat)left andBottomOffset:(CGFloat)bottom{
++(UIImage *)imageWithLogoText:(UIImage *)img andText:(NSString *)text andLeftOffset:(CGFloat)left andTopOffset:(CGFloat)top{
     //注：此为后来更改，用于显示中文。zyq,2013-5-8
     //设置上下文（画布）大小
-    CGSize size = CGSizeMake(200, img.size.height);
+    CGSize size = CGSizeMake(img.size.width, img.size.height);
     //创建一个基于位图的上下文(context)，并将其设置为当前上下文
     UIGraphicsBeginImageContext(size);
     //获取当前上下文
@@ -86,7 +86,7 @@
     UIFont *font = [UIFont systemFontOfSize:12];
     CGFloat width = [NSCameraUtil formatTextWidth:text addFont:font addHeight:40];
     //此处设置文字显示的位置
-    [text drawInRect:CGRectMake(left, img.size.height-bottom, width, 40) withFont:font];
+    [text drawInRect:CGRectMake(left, top, width, 40) withFont:font];
     //从当前上下文种获取图片
     UIImage *targetimg =UIGraphicsGetImageFromCurrentImageContext();
     //移除栈顶的基于当前位图的图形上下文。
@@ -96,7 +96,6 @@
 
 
 +(NSString *)getImageSavePath:(NSString *)fileName{
-    //获取存放的照片
     //获取Documents文件夹目录
     NSArray *path = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentPath = [path objectAtIndex:0];
